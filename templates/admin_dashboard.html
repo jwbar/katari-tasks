@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Task Manager{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>⚙️ Admin Dashboard</h1>
+    <div class="nav">
+        <a href="{{ url_for('admin_assign') }}">+ New Task</a>
+        <a href="{{ url_for('admin_archive') }}">📦 Archive</a>
+        <a href="{{ url_for('change_password') }}">Change Password</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Add User -->
+    <div class="card">
+        <h3 class="card-title">Quick Add User</h3>
+        <form method="POST" action="{{ url_for('admin_add_user') }}">
+            <div style="display: grid; gap: 10px;">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                <input type="email" name="email" class="form-control" placeholder="Email">
+                <select name="role" class="form-control">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Add User</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users List -->
+    <div class="card">
+        <h3 class="card-title">Team Members</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+            {% for user in users %}
+            <div class="user-chip" style="display: flex; align-items: center; gap: 8px;">
+                👤 {{ user.username }}
+                <form method="POST" action="{{ url_for('admin_reset_password', user_id=user._id) }}" style="display: inline;">
+                    <input type="text" name="new_password" placeholder="New pass" style="width: 80px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem;">
+                    <button type="submit" class="btn btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">Reset</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Tasks by Day -->
+    {% for day in weekdays %}
+    <div class="admin-section">
+        <div class="section-header">
+            <h3>{{ day }}</h3>
+            <span style="font-size: 0.85rem; color: #666;">
+                {{ tasks_by_day[day]|length }} tasks
+            </span>
+        </div>
+
+        {% if tasks_by_day[day] %}
+        <div class="task-list">
+            {% for task in tasks_by_day[day] %}
+            <div class="task-item {{ task.status }}">
+                <div class="task-header">
+                    <div>
+                        <div class="task-title">{{ task.title }}</div>
+                        <div class="task-meta">👤 {{ task.assignee_name }}</div>
+                    </div>
+                    <span class="task-status status-{{ task.status }}">{{ task.status }}</span>
+                </div>
+
+                {% if task.description %}
+                <p style="margin-top: 8px; color: #555; font-size: 0.9rem;">{{ task.description }}</p>
+                {% endif %}
+
+                {% if task.comment %}
+                <div class="task-comment" style="margin-top: 10px;">
+                    <strong>📝 Note:</strong> {{ task.comment }}
+                </div>
+                {% endif %}
+
+                {% if task.photo_path %}
+                <div class="task-photo" style="max-width: 200px; margin-top: 10px;">
+                    <img src="{{ url_for('static', filename=task.photo_path) }}" alt="Completion photo">
+                </div>
+                {% endif %}
+
+                <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                    {% if task.status == 'completed' and not task.archived %}
+                    <form method="POST" action="{{ url_for('admin_approve_task', task_id=task._id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-success btn-sm">✅ Approve & Archive</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('admin_delete_task', task_id=task._id) }}" style="display: inline;" onsubmit="return confirm('Delete this task?')">
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 0.9rem;">
+            No tasks assigned
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

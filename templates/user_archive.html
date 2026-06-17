@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}My Archive - Task Manager{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>📦 My Completed Tasks</h1>
+    <div class="nav">
+        <a href="{{ url_for('user_dashboard') }}">← Dashboard</a>
+        <a href="{{ url_for('change_password') }}">Change Password</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    {% if archived_tasks %}
+    <div class="task-list">
+        {% for task in archived_tasks %}
+        <div class="task-item completed" style="border-left-color: #38ef7d;">
+            <div class="task-header">
+                <div class="task-title">{{ task.title }}</div>
+                <span class="task-status status-completed">approved</span>
+            </div>
+            
+            <div class="task-meta">
+                📅 {{ task.weekday }}
+            </div>
+            
+            {% if task.description %}
+            <p style="margin-top: 8px; color: #555; font-size: 0.9rem;">{{ task.description }}</p>
+            {% endif %}
+            
+            {% if task.comment %}
+            <div class="task-comment">
+                <strong>📝 Note:</strong> {{ task.comment }}
+            </div>
+            {% endif %}
+            
+            {% if task.photo_path %}
+            <div class="task-photo">
+                <img src="{{ url_for('static', filename=task.photo_path) }}" alt="Task completion photo">
+            </div>
+            {% endif %}
+            
+            <div class="task-meta" style="margin-top: 10px;">
+                ✅ Completed {{ task.completed_at.strftime('%Y-%m-%d %H:%M') if task.completed_at else '' }}<br>
+                👑 Approved {{ task.approved_at.strftime('%Y-%m-%d %H:%M') if task.approved_at else '' }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>No archived tasks yet</h3>
+        <p>Completed tasks will appear here after admin approval.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}My Tasks - Task Manager{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>👋 Hello, {{ current_user.username }}</h1>
+    <div class="nav">
+        <a href="{{ url_for('user_archive') }}">📦 My Archive</a>
+        <a href="{{ url_for('change_password') }}">Change Password</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_count }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ completed_count }}</div>
+            <div class="stat-label">Total Completed</div>
+        </div>
+    </div>
+    
+    <div class="day-filter">
+        <button class="day-btn {% if not selected_day %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('user_dashboard') }}'">
+            All
+        </button>
+        {% for day in weekdays %}
+        <button class="day-btn {% if selected_day == day %}active{% endif %}"
+                onclick="window.location.href='{{ url_for('user_dashboard', day=day) }}'">
+            {{ day[:3] }}
+        </button>
+        {% endfor %}
+    </div>
+    
+    <h3 style="margin: 20px 0 15px; color: #333;">📋 Active Tasks</h3>
+    {% if tasks %}
+    <div class="task-list">
+        {% for task in tasks %}
+        <div class="task-item {{ task.status }}">
+            <div class="task-header">
+                <div class="task-title">{{ task.title }}</div>
+                <span class="task-status status-{{ task.status }}">{{ task.status }}</span>
+            </div>
+            
+            <div class="task-meta">
+                📅 {{ task.weekday }} 
+                {% if task.due_date %}| Due: {{ task.due_date }}{% endif %}
+            </div>
+            
+            {% if task.description %}
+            <p style="margin-top: 8px; color: #555; font-size: 0.9rem;">{{ task.description }}</p>
+            {% endif %}
+            
+            {% if task.status == 'completed' %}
+                {% if task.comment %}
+                <div class="task-comment">
+                    <strong>📝 Note:</strong> {{ task.comment }}
+                </div>
+                {% endif %}
+                
+                {% if task.photo_path %}
+                <div class="task-photo">
+                    <img src="{{ url_for('static', filename=task.photo_path) }}" alt="Task completion photo">
+                </div>
+                {% endif %}
+                
+                <div style="margin-top: 10px; padding: 10px; background: #fff3e0; border-radius: 10px; font-size: 0.85rem; color: #e65100;">
+                    ⏳ Awaiting admin approval...
+                </div>
+                
+                <div class="task-meta" style="margin-top: 10px;">
+                    ✅ Completed {{ task.completed_at.strftime('%Y-%m-%d %H:%M') if task.completed_at else '' }}
+                </div>
+            {% else %}
+                <a href="{{ url_for('task_detail', task_id=task._id) }}" class="btn btn-success btn-sm" style="margin-top: 12px;">
+                    Complete Task 📸
+                </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🎉</div>
+        <h3>No active tasks</h3>
+        <p>You're all caught up!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

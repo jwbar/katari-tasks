@@ -95,6 +95,7 @@ def admin_dashboard():
     if current_user.role != 'admin':
         flash('Access denied.', 'error')
         return redirect(url_for('user_dashboard'))
+    users = list(db.users.find({'role': 'user'}))
     tasks = Task.get_all_tasks(include_archived=False)
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     tasks_by_day = {day: [] for day in weekdays}
@@ -104,16 +105,7 @@ def admin_dashboard():
             assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
             task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
             tasks_by_day[day].append(task)
-    return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
-
-@app.route('/admin/users')
-@login_required
-def admin_users():
-    if current_user.role != 'admin':
-        flash('Access denied.', 'error')
-        return redirect(url_for('user_dashboard'))
-    users = list(db.users.find({'role': 'user'}))
-    return render_template('admin_users.html', users=users)
+    return render_template('admin_dashboard.html', users=users, tasks_by_day=tasks_by_day, weekdays=weekdays)
 
 @app.route('/admin/archive')
 @login_required
@@ -201,13 +193,13 @@ def admin_add_user():
     role = request.form.get('role', 'user')
     if not all([username, password]):
         flash('Username and password are required.', 'error')
-        return redirect(url_for('admin_users'))
+        return redirect(url_for('admin_dashboard'))
     user_id = User.create_user(username, password, email, role)
     if user_id:
         flash(f'User {username} created successfully!', 'success')
     else:
         flash('Username already exists.', 'error')
-    return redirect(url_for('admin_users'))
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/user/<user_id>/reset-password', methods=['POST'])
 @login_required
@@ -218,13 +210,13 @@ def admin_reset_password(user_id):
     new_password = request.form.get('new_password')
     if not new_password or len(new_password) < 4:
         flash('Password must be at least 4 characters.', 'error')
-        return redirect(url_for('admin_users'))
+        return redirect(url_for('admin_dashboard'))
     db.users.update_one(
         {'_id': ObjectId(user_id)},
         {'$set': {'password': generate_password_hash(new_password)}}
     )
     flash('Password reset successfully.', 'success')
-    return redirect(url_for('admin_users'))
+    return redirect(url_for('admin_dashboard'))
 
 # ==================== USER ROUTES ====================
 

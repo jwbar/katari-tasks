@@ -460,6 +460,36 @@
             color: #5a7d5a;
             font-size: 1.8rem;
         }
+
+        /* Date Dividers */
+.date-divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0 16px 0;
+    gap: 12px;
+}
+
+.date-divider .date-line {
+    flex: 1;
+    height: 1px;
+    background: #d0c8b8;
+}
+
+.date-divider .date-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b6b6b;
+    white-space: nowrap;
+    background: #f0ece0;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+
+/* Tighten gap when divider is first in the list */
+.task-list .date-divider:first-child {
+    margin-top: 8px;
+}
     </style>
     {% block extra_css %}{% endblock %}
 </head>

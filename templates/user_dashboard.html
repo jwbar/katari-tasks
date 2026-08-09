@@ -1,47 +1,24 @@
-{% extends "base.html" %}
-
-{% block title %}My Tasks - Task Manager{% endblock %}
-
-{% block content %}
-<div class="header">
-    <h1>👋 Hello, {{ current_user.username }}</h1>
-    <div class="nav">
-        <a href="{{ url_for('user_archive') }}">📦 My Archive</a>
-        <a href="{{ url_for('change_password') }}">Change Password</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </div>
-</div>
-
-<div class="container">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-number">{{ pending_count }}</div>
-            <div class="stat-label">Pending</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ completed_count }}</div>
-            <div class="stat-label">Total Completed</div>
-        </div>
-    </div>
-
-    <div class="day-filter">
-        <button class="day-btn {% if not selected_day %}active{% endif %}"
-                onclick="window.location.href='{{ url_for('user_dashboard') }}'">
-            All
-        </button>
-        {% for day in weekdays %}
-        <button class="day-btn {% if selected_day == day %}active{% endif %}"
-                onclick="window.location.href='{{ url_for('user_dashboard', day=day) }}'">
-            {{ day[:3] }}
-        </button>
-        {% endfor %}
-    </div>
-
-    <h3 style="margin: 20px 0 15px; color: #333;">📋 Active Tasks</h3>
     {% if tasks %}
     <div class="task-list">
+        {% set ns = namespace(prev_date=None) %}
         {% for task in tasks %}
+            {% if task.due_date != ns.prev_date %}
+            <div class="date-divider">
+                <span class="date-line"></span>
+                <span class="date-label">
+                    {% if task.due_date %}
+                        📅 {{ task.due_date }}
+                    {% else %}
+                        📅 No due date
+                    {% endif %}
+                </span>
+                <span class="date-line"></span>
+            </div>
+            {% set ns.prev_date = task.due_date %}
+            {% endif %}
+            
         <div class="task-item {{ task.status }}">
+            <!-- keep your existing task card content exactly as-is -->
             <div class="task-header">
                 <div class="task-title">{{ task.title }}</div>
                 <span class="task-status status-{{ task.status }}">{{ task.status }}</span>
@@ -84,12 +61,36 @@
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon">🎉</div>
-        <h3>No active tasks</h3>
-        <p>You're all caught up!</p>
-    </div>
-    {% endif %}
-</div>
-{% endblock %}
+    ```
+
+Add this CSS to your stylesheet (or a `<style>` block in `base.html`):
+
+```css
+.date-divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0 16px 0;
+    gap: 12px;
+}
+
+.date-divider .date-line {
+    flex: 1;
+    height: 1px;
+    background: #d0d0d0;
+}
+
+.date-divider .date-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+    background: #f0f0f0;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+
+/* Tighten the gap when a divider is the first thing in the list */
+.task-list .date-divider:first-child {
+    margin-top: 8px;
+}

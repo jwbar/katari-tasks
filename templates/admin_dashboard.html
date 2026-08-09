@@ -22,7 +22,7 @@
                 onchange="const url = new URL(window.location.href); if(this.value){url.searchParams.set('user', this.value);}else{url.searchParams.delete('user');} window.location.href = url.toString();">
             <option value="">👤 All Users</option>
             {% for user in users %}
-            <option value="{{ user._id }}" {% if selected_user == user._id|string %}selected{% endif %}>
+            <option value="{{ user._id|string }}" {% if selected_user == user._id|string %}selected{% endif %}>
                 {{ user.username }}
             </option>
             {% endfor %}

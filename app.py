@@ -105,14 +105,18 @@ def admin_dashboard():
     
     for task in tasks:
         day = task.get('weekday', 'Unassigned')
-        if day in tasks_by_day:
-            # Filter by selected user if set
-            if selected_user and str(task.get('assigned_to', '')) != selected_user:
+        if day not in tasks_by_day:
+            continue
+        
+        # Filter by user
+        if selected_user:
+            task_assignee = str(task.get('assigned_to', ''))
+            if task_assignee != selected_user:
                 continue
-            
-            assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
-            task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
-            tasks_by_day[day].append(task)
+        
+        assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
+        task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
+        tasks_by_day[day].append(task)
     
     for day in weekdays:
         tasks_by_day[day].sort(key=lambda t: (str(t.get('due_date') or '9999-99-99'), t.get('title', '').lower()))

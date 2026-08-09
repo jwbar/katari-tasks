@@ -15,19 +15,26 @@
 </div>
 
 <div class="container">
-    <!-- User Filter -->
-    <div class="form-group" style="margin-bottom: 12px;">
-        <label style="font-size: 0.85rem; color: #666; margin-bottom: 4px; display: block;">Filter by User</label>
-        <select class="form-control" style="max-width: 300px;" 
-                onchange="const url = new URL(window.location.href); if(this.value){url.searchParams.set('user', this.value);}else{url.searchParams.delete('user');} window.location.href = url.toString();">
-            <option value="">👤 All Users</option>
-            {% for user in users %}
-            <option value="{{ user._id|string }}" {% if selected_user == user._id|string %}selected{% endif %}>
-                {{ user.username }}
-            </option>
-            {% endfor %}
-        </select>
-    </div>
+      <!-- User Filter (form-based, no JS) -->
+    <form method="GET" action="{{ url_for('admin_dashboard') }}" style="margin-bottom: 12px;">
+        <div class="form-group">
+            <label style="font-size: 0.85rem; color: #666; margin-bottom: 4px; display: block;">Filter by User</label>
+            <div style="display: flex; gap: 10px; align-items: stretch;">
+                <select name="user" class="form-control" style="max-width: 300px; flex: 1;">
+                    <option value="" {% if not selected_user %}selected{% endif %}>👤 All Users</option>
+                    {% for user in users %}
+                    <option value="{{ user._id|string }}" {% if selected_user == user._id|string %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm" style="width: auto;">Filter</button>
+            </div>
+        </div>
+        {% if selected_day %}
+        <input type="hidden" name="day" value="{{ selected_day }}">
+        {% endif %}
+    </form>
 
     <!-- Day Filter -->
     <div class="day-filter">

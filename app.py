@@ -98,6 +98,12 @@ def admin_dashboard():
     
     selected_day = request.args.get('day', None)
     selected_user = request.args.get('user', None)
+    
+    # DEBUG: check your terminal when you hit Filter
+    print(f"\n=== ADMIN DASHBOARD ===")
+    print(f"selected_day: {selected_day}")
+    print(f"selected_user: {selected_user}")
+    
     tasks = Task.get_all_tasks(include_archived=False)
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     tasks_by_day = {day: [] for day in weekdays}
@@ -108,9 +114,9 @@ def admin_dashboard():
         if day not in tasks_by_day:
             continue
         
-        # Filter by user
         if selected_user:
             task_assignee = str(task.get('assigned_to', ''))
+            print(f"  Task '{task.get('title', 'untitled')}' -> assigned_to: {task_assignee} (vs {selected_user}) match: {task_assignee == selected_user}")
             if task_assignee != selected_user:
                 continue
         

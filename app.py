@@ -97,13 +97,19 @@ def admin_dashboard():
         return redirect(url_for('user_dashboard'))
     
     selected_day = request.args.get('day', None)
+    selected_user = request.args.get('user', None)
     tasks = Task.get_all_tasks(include_archived=False)
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     tasks_by_day = {day: [] for day in weekdays}
+    users = list(db.users.find({'role': 'user'}).sort('username', 1))
     
     for task in tasks:
         day = task.get('weekday', 'Unassigned')
         if day in tasks_by_day:
+            # Filter by selected user if set
+            if selected_user and str(task.get('assigned_to', '')) != selected_user:
+                continue
+            
             assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
             task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
             tasks_by_day[day].append(task)
@@ -111,7 +117,8 @@ def admin_dashboard():
     for day in weekdays:
         tasks_by_day[day].sort(key=lambda t: (str(t.get('due_date') or '9999-99-99'), t.get('title', '').lower()))
     
-    return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays, selected_day=selected_day)
+    return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays,
+                         selected_day=selected_day, users=users, selected_user=selected_user)
 
 @app.route('/admin/users')
 @login_required

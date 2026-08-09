@@ -26,7 +26,23 @@
 
         {% if tasks_by_day[day] %}
         <div class="task-list">
+            {% set ns = namespace(prev_date=None) %}
             {% for task in tasks_by_day[day] %}
+                {% if task.due_date != ns.prev_date %}
+                <div class="date-divider">
+                    <span class="date-line"></span>
+                    <span class="date-label">
+                        {% if task.due_date %}
+                            📅 {{ task.due_date }}
+                        {% else %}
+                            📅 No due date
+                        {% endif %}
+                    </span>
+                    <span class="date-line"></span>
+                </div>
+                {% set ns.prev_date = task.due_date %}
+                {% endif %}
+
             <div class="task-item {{ task.status }}">
                 <div class="task-header">
                     <div>

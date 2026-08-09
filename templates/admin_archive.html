@@ -40,9 +40,27 @@
             <a href="{{ url_for('admin_archive') }}" class="btn btn-secondary btn-sm" style="width: auto; margin-bottom: 0;">Clear</a>
             {% endif %}
         </div>
+        {% if selected_day %}
+        <input type="hidden" name="day" value="{{ selected_day }}">
+        {% endif %}
     </form>
 
+    <!-- Day Filter -->
+    <div class="day-filter" style="margin-bottom: 15px;">
+        <button class="day-btn {% if not selected_day %}active{% endif %}"
+                onclick="const url = new URL(window.location.href); url.searchParams.delete('day'); window.location.href = url.toString();">
+            All
+        </button>
+        {% for day in weekdays %}
+        <button class="day-btn {% if selected_day == day %}active{% endif %}"
+                onclick="const url = new URL(window.location.href); url.searchParams.set('day', '{{ day }}'); window.location.href = url.toString();">
+            {{ day[:3] }}
+        </button>
+        {% endfor %}
+    </div>
+
     {% for day in weekdays %}
+    {% if not selected_day or selected_day == day %}
     <div class="admin-section">
         <div class="section-header">
             <h3>{{ day }}</h3>
@@ -53,7 +71,23 @@
 
         {% if tasks_by_day[day] %}
         <div class="task-list">
+            {% set ns = namespace(prev_date=None) %}
             {% for task in tasks_by_day[day] %}
+                {% if task.due_date != ns.prev_date %}
+                <div class="date-divider">
+                    <span class="date-line"></span>
+                    <span class="date-label">
+                        {% if task.due_date %}
+                            📅 {{ task.due_date }}
+                        {% else %}
+                            📅 No due date
+                        {% endif %}
+                    </span>
+                    <span class="date-line"></span>
+                </div>
+                {% set ns.prev_date = task.due_date %}
+                {% endif %}
+
             <div class="task-item completed" style="opacity: 0.85;">
                 <div class="task-header">
                     <div>
@@ -96,6 +130,7 @@
         </div>
         {% endif %}
     </div>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}

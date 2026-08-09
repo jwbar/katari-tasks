@@ -146,6 +146,7 @@ def admin_archive():
         flash('Access denied.', 'error')
         return redirect(url_for('user_dashboard'))
     
+    selected_day = request.args.get('day', None)
     selected_date = request.args.get('date', None)
     selected_user = request.args.get('user', None)
     
@@ -180,15 +181,21 @@ def admin_archive():
         task['approver_name'] = approver['username'] if approver else 'Unknown'
         tasks_by_day[day].append(task)
     
-    # Sort newest first (by approved_at, fallback to completed_at)
+    # Sort by due_date descending (newest date first), then approved_at descending
     for day in weekdays:
-        tasks_by_day[day].sort(
-            key=lambda t: t.get('approved_at') or t.get('completed_at') or datetime.min,
-            reverse=True
-        )
+        def sort_key(t):
+            due = t.get('due_date')
+            if isinstance(due, datetime):
+                due = due.strftime('%Y-%m-%d')
+            due = str(due) if due else '0000-00-00'
+            approved = t.get('approved_at') or datetime.min
+            return (due, approved)
+        
+        tasks_by_day[day].sort(key=sort_key, reverse=True)
     
     return render_template('admin_archive.html', tasks_by_day=tasks_by_day, weekdays=weekdays,
-                         users=users, selected_date=selected_date, selected_user=selected_user)
+                         users=users, selected_date=selected_date, selected_user=selected_user,
+                         selected_day=selected_day)
 
 @app.route('/admin/task/<task_id>/approve', methods=['POST'])
 @login_required

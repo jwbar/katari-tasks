@@ -107,6 +107,8 @@ def admin_dashboard():
     for day in weekdays:
         tasks_by_day[day].sort(key=lambda t: (str(t.get('due_date') or '9999-99-99'), t.get('title', '').lower()))
 
+        return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
+
 @app.route('/admin/users')
 @login_required
 def admin_users():

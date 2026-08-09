@@ -145,20 +145,50 @@ def admin_archive():
     if current_user.role != 'admin':
         flash('Access denied.', 'error')
         return redirect(url_for('user_dashboard'))
+    
+    selected_date = request.args.get('date', None)
+    selected_user = request.args.get('user', None)
+    
     archived_tasks = Task.get_archived_tasks()
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     tasks_by_day = {day: [] for day in weekdays}
+    users = list(db.users.find({'role': 'user'}).sort('username', 1))
+    
     for task in archived_tasks:
         day = task.get('weekday', 'Unassigned')
-        if day in tasks_by_day:
-            assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
-            task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
-            approver = db.users.find_one({'_id': ObjectId(task.get('approved_by', ''))})
-            task['approver_name'] = approver['username'] if approver else 'Unknown'
-            tasks_by_day[day].append(task)
+        if day not in tasks_by_day:
+            continue
+        
+        # Filter by user
+        if selected_user:
+            task_assignee = str(task.get('assigned_to', ''))
+            if task_assignee != selected_user:
+                continue
+        
+        # Filter by due date
+        if selected_date:
+            task_due = task.get('due_date', '')
+            if isinstance(task_due, datetime):
+                task_due = task_due.strftime('%Y-%m-%d')
+            task_due = str(task_due)[:10] if task_due else ''
+            if task_due != selected_date:
+                continue
+        
+        assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
+        task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
+        approver = db.users.find_one({'_id': ObjectId(task.get('approved_by', ''))})
+        task['approver_name'] = approver['username'] if approver else 'Unknown'
+        tasks_by_day[day].append(task)
+    
+    # Sort newest first (by approved_at, fallback to completed_at)
     for day in weekdays:
-        tasks_by_day[day].sort(key=lambda t: (t.get('due_date') or '9999-99-99', t.get('title', '').lower()))
-    return render_template('admin_archive.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
+        tasks_by_day[day].sort(
+            key=lambda t: t.get('approved_at') or t.get('completed_at') or datetime.min,
+            reverse=True
+        )
+    
+    return render_template('admin_archive.html', tasks_by_day=tasks_by_day, weekdays=weekdays,
+                         users=users, selected_date=selected_date, selected_user=selected_user)
 
 @app.route('/admin/task/<task_id>/approve', methods=['POST'])
 @login_required

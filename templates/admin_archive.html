@@ -13,6 +13,35 @@
 </div>
 
 <div class="container">
+    <!-- Filters -->
+    <form method="GET" action="{{ url_for('admin_archive') }}" style="margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+            <div class="form-group" style="flex: 1; min-width: 140px; margin-bottom: 0;">
+                <label style="font-size: 0.85rem; color: #666; margin-bottom: 4px; display: block;">Due Date</label>
+                <input type="date" name="date" class="form-control" 
+                       value="{{ selected_date if selected_date else '' }}">
+            </div>
+            
+            <div class="form-group" style="flex: 1; min-width: 140px; margin-bottom: 0;">
+                <label style="font-size: 0.85rem; color: #666; margin-bottom: 4px; display: block;">User</label>
+                <select name="user" class="form-control">
+                    <option value="" {% if not selected_user %}selected{% endif %}>All Users</option>
+                    {% for user in users %}
+                    <option value="{{ user._id|string }}" {% if selected_user == user._id|string %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-sm" style="width: auto; margin-bottom: 0;">Filter</button>
+            
+            {% if selected_date or selected_user %}
+            <a href="{{ url_for('admin_archive') }}" class="btn btn-secondary btn-sm" style="width: auto; margin-bottom: 0;">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+
     {% for day in weekdays %}
     <div class="admin-section">
         <div class="section-header">

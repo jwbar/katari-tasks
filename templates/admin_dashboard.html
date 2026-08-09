@@ -53,11 +53,14 @@
                 {% endif %}
 
                 <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                    <a href="{{ url_for('admin_edit_task', task_id=task._id) }}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+                    
                     {% if task.status == 'completed' and not task.archived %}
                     <form method="POST" action="{{ url_for('admin_approve_task', task_id=task._id) }}" style="display: inline;">
                         <button type="submit" class="btn btn-success btn-sm">✅ Approve & Archive</button>
                     </form>
                     {% endif %}
+                    
                     <form method="POST" action="{{ url_for('admin_delete_task', task_id=task._id) }}" style="display: inline;" onsubmit="return confirm('Delete this task?')">
                         <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
                     </form>
@@ -74,4 +77,3 @@
     {% endfor %}
 </div>
 {% endblock %}
-EOF

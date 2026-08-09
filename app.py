@@ -156,6 +156,45 @@ def admin_approve_task(task_id):
     flash('Task approved and archived.', 'success')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/task/<task_id>/edit', methods=['GET', 'POST'])
+@login_required
+def admin_edit_task(task_id):
+    if current_user.role != 'admin':
+        flash('Access denied.', 'error')
+        return redirect(url_for('user_dashboard'))
+    
+    task = Task.get_task(task_id)
+    if not task:
+        flash('Task not found.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    users = list(db.users.find({'role': 'user'}))
+    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        assigned_to = request.form.get('assigned_to')
+        weekday = request.form.get('weekday')
+        due_date = request.form.get('due_date') or None
+        
+        if not all([title, assigned_to, weekday]):
+            flash('Please fill in all required fields.', 'error')
+            return redirect(url_for('admin_edit_task', task_id=task_id))
+        
+        updates = {
+            'title': title,
+            'description': description,
+            'assigned_to': assigned_to,
+            'weekday': weekday,
+            'due_date': due_date
+        }
+        Task.update_task(task_id, updates)
+        flash('Task updated successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('admin_edit_task.html', task=task, users=users, weekdays=weekdays)
+
 @app.route('/admin/assign', methods=['GET', 'POST'])
 @login_required
 def admin_assign():

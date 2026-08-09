@@ -45,17 +45,17 @@
         {% endif %}
     </form>
 
-    <!-- Day Filter -->
+    <!-- Day Filter (a tags, no JS) -->
     <div class="day-filter" style="margin-bottom: 15px;">
-        <button class="day-btn {% if not selected_day %}active{% endif %}"
-                onclick="const url = new URL(window.location.href); url.searchParams.delete('day'); window.location.href = url.toString();">
+        <a href="{{ url_for('admin_archive') }}{% if selected_date or selected_user %}?{% endif %}{% if selected_date %}date={{ selected_date }}{% endif %}{% if selected_date and selected_user %}&{% endif %}{% if selected_user %}user={{ selected_user }}{% endif %}" 
+           class="day-btn {% if not selected_day %}active{% endif %}">
             All
-        </button>
+        </a>
         {% for day in weekdays %}
-        <button class="day-btn {% if selected_day == day %}active{% endif %}"
-                onclick="const url = new URL(window.location.href); url.searchParams.set('day', '{{ day }}'); window.location.href = url.toString();">
+        <a href="{{ url_for('admin_archive', day=day) }}{% if selected_date or selected_user %}&{% endif %}{% if selected_date %}date={{ selected_date }}{% endif %}{% if selected_date and selected_user %}&{% endif %}{% if selected_user %}user={{ selected_user }}{% endif %}" 
+           class="day-btn {% if selected_day == day %}active{% endif %}">
             {{ day[:3] }}
-        </button>
+        </a>
         {% endfor %}
     </div>
 

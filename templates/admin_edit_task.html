@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Task - Task Manager{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>✏️ Edit Task</h1>
+    <div class="nav">
+        <a href="{{ url_for('admin_dashboard') }}">← Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <form method="POST" action="{{ url_for('admin_edit_task', task_id=task._id) }}">
+            <div class="form-group">
+                <label for="title">Task Title *</label>
+                <input type="text" id="title" name="title" class="form-control" value="{{ task.title }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" class="form-control">{{ task.description or '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="assigned_to">Assign To *</label>
+                <select id="assigned_to" name="assigned_to" class="form-control" required>
+                    {% for user in users %}
+                    <option value="{{ user._id }}" {% if task.assigned_to == user._id|string %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="weekday">Weekday *</label>
+                <select id="weekday" name="weekday" class="form-control" required>
+                    {% for day in weekdays %}
+                    <option value="{{ day }}" {% if task.weekday == day %}selected{% endif %}>
+                        {{ day }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="due_date">Due Date</label>
+                <input type="date" id="due_date" name="due_date" class="form-control"
+                       value="{{ task.due_date if task.due_date else '' }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary" style="margin-top: 10px;">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -95,19 +95,23 @@ def admin_dashboard():
     if current_user.role != 'admin':
         flash('Access denied.', 'error')
         return redirect(url_for('user_dashboard'))
+    
+    selected_day = request.args.get('day', None)
     tasks = Task.get_all_tasks(include_archived=False)
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     tasks_by_day = {day: [] for day in weekdays}
+    
     for task in tasks:
         day = task.get('weekday', 'Unassigned')
         if day in tasks_by_day:
             assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
             task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
             tasks_by_day[day].append(task)
+    
     for day in weekdays:
         tasks_by_day[day].sort(key=lambda t: (str(t.get('due_date') or '9999-99-99'), t.get('title', '').lower()))
-
-        return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
+    
+    return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays, selected_day=selected_day)
 
 @app.route('/admin/users')
 @login_required

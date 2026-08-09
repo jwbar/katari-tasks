@@ -15,7 +15,21 @@
 </div>
 
 <div class="container">
+    <div class="day-filter">
+        <button class="day-btn {% if not selected_day %}active{% endif %}"
+                onclick="window.location.href='{{ url_for('admin_dashboard') }}'">
+            All
+        </button>
+        {% for day in weekdays %}
+        <button class="day-btn {% if selected_day == day %}active{% endif %}"
+                onclick="window.location.href='{{ url_for('admin_dashboard', day=day) }}'">
+            {{ day[:3] }}
+        </button>
+        {% endfor %}
+    </div>
+
     {% for day in weekdays %}
+    {% if not selected_day or selected_day == day %}
     <div class="admin-section">
         <div class="section-header">
             <h3>{{ day }}</h3>
@@ -90,6 +104,7 @@
         </div>
         {% endif %}
     </div>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}

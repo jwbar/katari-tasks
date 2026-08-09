@@ -104,6 +104,8 @@ def admin_dashboard():
             assignee = db.users.find_one({'_id': ObjectId(task['assigned_to'])})
             task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
             tasks_by_day[day].append(task)
+    for day in weekdays:
+        tasks_by_day[day].sort(key=lambda t: (t.get('due_date') or '9999-99-99', t.get('title', '').lower()))
     return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
 
 @app.route('/admin/users')
@@ -132,6 +134,8 @@ def admin_archive():
             approver = db.users.find_one({'_id': ObjectId(task.get('approved_by', ''))})
             task['approver_name'] = approver['username'] if approver else 'Unknown'
             tasks_by_day[day].append(task)
+    for day in weekdays:
+        tasks_by_day[day].sort(key=lambda t: (t.get('due_date') or '9999-99-99', t.get('title', '').lower()))
     return render_template('admin_archive.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
 
 @app.route('/admin/task/<task_id>/approve', methods=['POST'])
@@ -236,6 +240,7 @@ def user_dashboard():
     selected_day = request.args.get('day', None)
     active_tasks = Task.get_user_tasks(current_user.id, selected_day, include_archived=False)
     archived_tasks = Task.get_user_archived_tasks(current_user.id)
+    active_tasks.sort(key=lambda t: (t.get('due_date') or '9999-99-99', t.get('title', '').lower()))
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     pending = sum(1 for t in active_tasks if t['status'] == 'pending')
     completed = sum(1 for t in active_tasks if t['status'] == 'completed')

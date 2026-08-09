@@ -23,9 +23,9 @@
             <div class="stat-label">Total Completed</div>
         </div>
     </div>
-    
+
     <div class="day-filter">
-        <button class="day-btn {% if not selected_day %}active{% endif %}" 
+        <button class="day-btn {% if not selected_day %}active{% endif %}"
                 onclick="window.location.href='{{ url_for('user_dashboard') }}'">
             All
         </button>
@@ -36,7 +36,7 @@
         </button>
         {% endfor %}
     </div>
-    
+
     <h3 style="margin: 20px 0 15px; color: #333;">📋 Active Tasks</h3>
     {% if tasks %}
     <div class="task-list">
@@ -46,33 +46,33 @@
                 <div class="task-title">{{ task.title }}</div>
                 <span class="task-status status-{{ task.status }}">{{ task.status }}</span>
             </div>
-            
+
             <div class="task-meta">
-                📅 {{ task.weekday }} 
+                📅 {{ task.weekday }}
                 {% if task.due_date %}| Due: {{ task.due_date }}{% endif %}
             </div>
-            
+
             {% if task.description %}
             <p style="margin-top: 8px; color: #555; font-size: 0.9rem;">{{ task.description }}</p>
             {% endif %}
-            
+
             {% if task.status == 'completed' %}
                 {% if task.comment %}
                 <div class="task-comment">
                     <strong>📝 Note:</strong> {{ task.comment }}
                 </div>
                 {% endif %}
-                
+
                 {% if task.photo_path %}
                 <div class="task-photo">
                     <img src="{{ url_for('static', filename=task.photo_path) }}" alt="Task completion photo">
                 </div>
                 {% endif %}
-                
+
                 <div style="margin-top: 10px; padding: 10px; background: #fff3e0; border-radius: 10px; font-size: 0.85rem; color: #e65100;">
                     ⏳ Awaiting admin approval...
                 </div>
-                
+
                 <div class="task-meta" style="margin-top: 10px;">
                     ✅ Completed {{ task.completed_at.strftime('%Y-%m-%d %H:%M') if task.completed_at else '' }}
                 </div>

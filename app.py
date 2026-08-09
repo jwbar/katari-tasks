@@ -105,8 +105,7 @@ def admin_dashboard():
             task['assignee_name'] = assignee['username'] if assignee else 'Unknown'
             tasks_by_day[day].append(task)
     for day in weekdays:
-        tasks_by_day[day].sort(key=lambda t: (t.get('due_date') or '9999-99-99', t.get('title', '').lower()))
-    return render_template('admin_dashboard.html', tasks_by_day=tasks_by_day, weekdays=weekdays)
+        tasks_by_day[day].sort(key=lambda t: (str(t.get('due_date') or '9999-99-99'), t.get('title', '').lower()))
 
 @app.route('/admin/users')
 @login_required
